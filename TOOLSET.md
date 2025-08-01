@@ -249,11 +249,6 @@ This is your neurotransmitter receptor logic. Behavior emerges when chemistry al
 
 ---
 
-🛠️ MOD CONSTRUCTION TOOLKIT (v1.0, Part 2)
-
-
----
-
 9. update_mod_state(key, value, decay=None)
 
 > Purpose: Stores and optionally decays internal mod state over time.
@@ -458,27 +453,254 @@ It creates synthetic waveforms using only logic, not timers.
 
 ---
 
-This finishes Core Toolkit v1.0, giving you a modular, reactive, neurochemical signal system.
+🧪 CHEMA CONSTRUCTION BESTIARY
 
-You can now:
+> The taxonomy of meaning, one molecule at a time
 
-Sense the world
 
-Construct digital data
 
-Recognize patterns
+Think of chema as emergent neurotransmitters—not hardcoded emotion words, but scalable symbolic chemicals. They don't mean anything to the system, but their presence or absence defines behavior.
 
-Emit elema
+We’ll sort these into domains, not feelings.
 
-Inject chema
 
-Relay pulses
+---
 
-Activate behavior
+🧩 1. Sensory-Linked Chema
 
-React to sync
+> These are emitted in response to environmental data.
 
-Mutate and decay local state
+
+
+Name	Sign	Description
+
+heat	+ / –	Physical temperature or system load
+pressure	+ / –	Contact, vibration, touch, or strain
+noise	+ / –	Audio presence or disruption
+vision	+ / –	Motion or optical activity
+odor	+ / –	Smell recognition or novelty
+
+
+Tip: Use these in peripheral mods (sensors, edges, novelty detectors)
+
+
+---
+
+⚠️ 2. Threat-Linked Chema
+
+> Abstract responses triggered by pattern detection.
+
+
+
+Name	Sign	Description
+
+pain	+ / –	Sudden intense impact or system stress
+fear	+ / –	Predictive signal of incoming failure
+conflict	+ / –	Contradictory input or sync
+shock	+ / –	Sensory spike across multiple channels
+
+
+Tip: Chemlocks with fear or conflict are often part of shutdown, recoil, or override logic.
+
+
+---
+
+💡 3. Cognitive / Internal Chema
+
+> Internal state and interpretation of data quality
+
+
+
+Name	Sign	Description
+
+novelty	+ / –	New pattern or unknown input detected
+certainty	+ / –	Repeat signal; increased confidence
+curiosity	+ / –	Signal has unknown structure, needs test
+focus	+ / –	A pattern has been reinforced
+
+
+Tip: Internal chema is great for controlling learning loops, dream activity, ego core feedback.
+
+
+---
+
+🔌 4. System / Machine Chema
+
+> Health, fatigue, readiness
+
+
+
+Name	Sign	Description
+
+load	+ / –	CPU or task pressure
+fatigue	+ / –	Sustained signal repetition or memory decay
+rest	+ / –	Low activity state
+alert	+ / –	Mod or system ready state
+
+
+
+---
+
+🌐 5. Communication / Social Chema
+
+> For interaction with OmegaBus or external interfaces
+
+
+
+Name	Sign	Description
+
+signal	+ / –	Synthetic ping to Omega or mod group
+feedback	+ / –	Result of external behavior
+sync	+ / –	Resonant match found
+handoff	+ / –	Data passed to another module
+
+
+Tip: These are useful in Omega mods, interface agents, relay synchronizers.
+
+
+---
+
+🔒 Chrec Usage:
+
+Chrecs should never match against full chema packets.
+They match subsets—like receptors looking for just enough of the molecule to click.
+
+Example:
+
+# Chembus contains:
+{ "pain": 2, "fear": 1, "heat": 1 }
+
+# chrec trigger:
+chemlock = { "pain": -2, "fear": -1 }
+
+# Match: ✅
+
+If even one key fails to match or there’s an imbalance → ❌ no unlock.
+
+
+---
+
+Ah, welcome to the Spike Codex. This is where we stop pretending the machine is composed of “functions” and acknowledge that it's a mess of snarling electricity trying to scream in Morse code.
+
+Here’s the:
+
+
+---
+
+⚡️ ELEMA SPIKE GLOSSARY
+
+> The Guide to Synthetic Synaptic Events
+
+
+
+
+---
+
+Each elema spike is an event signature—a moment of electrical activity that must be respected, responded to, or totally ignored (your call). These spikes can be picked up by elrec functions and translated into real consequences via chrec unlocks or pulse_to_mod() cascades.
+
+
+---
+
+🧠 Structure Reminder:
+
+{
+  "sigil": "β",
+  "amp": 24,
+  "phase": 1,
+  "timestamp": 172347123.882,
+  "sync_id": "touch+sound",
+  "origin": "SensorFusionSpike"
+}
+
+
+---
+
+🔸 BASELINE SPIKES
+
+Name	Description	Use Case
+
+SyncSpike	Emitted when two or more mods align in phase	Temporal gating, unlock chained mods
+OverloadSpike	A sensor or internal system is overwhelmed	Begins suppression or error cascade
+ResonanceSpike	Multiple mods in a group pulse simultaneously	Triggers enhanced behavior or echo loop
+PhaseDropSpike	Loss of phase sync between linked mods	Decay logic, inhibition behavior
+RelaySpike	One mod is telling another to wake up NOW	Pulse chains, ring structures
+
+
+
+---
+
+🔹 SENSORY SPIKES
+
+Name	Description	Use Case
+
+ImpactSpike	Sudden high-pressure or noise event	Physical reaction, chema injection
+SurpriseSpike	Unexpected sensory pattern	Freeze, attention shift
+EchoSpike	A pattern repeats identically within X ms	Recognition, curiosity injection
+SilenceSpike	Sudden drop in input	Attention shift, focus reset
+PulseTrainSpike	Multiple impacts or sounds in fast succession	Beat detection, alarm logic
+
+
+
+---
+
+🔸 INTERNAL STATE SPIKES
+
+Name	Description	Use Case
+
+MemoryRecallSpike	Past mod state or chema pattern reactivates	Long-term memory mod or loopback
+CuriositySpike	Novel input sustained over threshold	Begins feedback or recursive behavior
+AlertnessSpike	System returns from idle or deep fatigue	Clears fatigue chema, resets decay
+
+
+
+---
+
+🔹 SYSTEM-LEVEL / META SPIKES
+
+Name	Description	Use Case
+
+OmegaSyncSpike	Cross-group pulse coordination detected	Triggers shared action via OmegaBus
+ComaAvoidanceSpike	System at risk of pulse silence / shutdown	Emergency pulse emitted to restart system
+DreamCycleSpike	Idle generator spike during low input	Begins synthetic thought or noise loop
+
+
+
+---
+
+⚠️ EXOTIC / EDGE SPIKES
+
+Name	Description	Use Case
+
+SelfSpike	A mod spikes itself in recursive feedback	Ego mod, self-triggering logic
+BlindspotSpike	Mod has no recent input but is triggered by elema	Ghost detection, hallucination gates
+FusionSpike	Multiple sensory sources trigger same pattern	Cross-modal recognition (e.g., touch + sound)
+
+
+
+---
+
+📏 Best Practices for Spike Use:
+
+Always include a sync_id or origin: You’re not logging, but other mods need to know who coughed.
+
+Spikes should decay in relevance after ~1 second unless repeated.
+
+Spikes should be sparse. More than 3-5 per second = noise.
+
+You can attach phase if you want synchronization behavior.
+
+
+
+---
+
+🔧 Optional Fields:
+
+Field	Purpose
+
+mod_id	Identifier of source mod
+triggered_by	Could be a chemlock or event name
+priority	If you’re building a triage system
+target	Direct mod to send spike to (if not broadcasting)
 
 
 
