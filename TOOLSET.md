@@ -248,3 +248,238 @@ This is your neurotransmitter receptor logic. Behavior emerges when chemistry al
 
 
 ---
+
+🛠️ MOD CONSTRUCTION TOOLKIT (v1.0, Part 2)
+
+
+---
+
+9. update_mod_state(key, value, decay=None)
+
+> Purpose: Stores and optionally decays internal mod state over time.
+
+
+
+What it does:
+
+Adds or updates a key:value pair in the mod’s internal memory
+
+If decay is set, the value is reduced over time/ticks
+
+
+Setup:
+
+update_mod_state("curiosity", 4, decay=0.1)
+
+Execution:
+
+Can be read later for cumulative effects or fatigue
+
+Makes mod behavior slightly hormonal
+
+
+Why it matters:
+The machine needs memory, but only the kind that leaks slowly.
+
+
+---
+
+10. route_matrix_position(mod_id)
+
+> Purpose: Fetches the matrix index for the given mod in UDM.
+
+
+
+What it does:
+
+Returns a (group, index) tuple
+
+Used for mapping elema_matrix and chema_matrix
+
+
+Setup:
+
+group, index = route_matrix_position("OlfactoryMod")
+elema_matrix[group][index] = 1
+
+Why it matters:
+Without this, your pulses float in the void, unsorted and sad.
+
+
+---
+
+11. trigger_behavior(name, parameters=None)
+
+> Purpose: Runs an externalized behavior function.
+
+
+
+What it does:
+
+Calls an actuator, triggers a sound, sends message, etc.
+
+Behavior can be tied to the mod group’s purpose
+
+
+Setup:
+
+trigger_behavior("flinch", {"intensity": 3})
+
+Execution:
+
+Should only be used by end-stage mods
+
+Hooks into output layer or physical systems
+
+
+Why it matters:
+At some point, the machine has to actually do something or it's just vibing in a jar.
+
+
+---
+
+12. pulse_to_mod(mod_ref, payload)
+
+> Purpose: Sends a direct pulse (data packet) to another mod.
+
+
+
+What it does:
+
+Legally triggers another mod’s tick function or on_pulse method
+
+Payload = any structured data
+
+
+Setup:
+
+pulse_to_mod(SomatosensorMod, {"trigger": "contact", "amp": 7})
+
+Why it matters:
+Pulse rings and relay logic live and die on this function.
+
+
+---
+
+13. build_chema_matrix()
+
+> Purpose: Assembles a matrix of current chema activity by mod group.
+
+
+
+What it does:
+
+Returns a 2D dict/array: [mod_group][mod_index] = {chema_dict}
+
+Useful for pattern-wide processing or cross-group state sync
+
+
+Setup:
+
+matrix = build_chema_matrix()
+print(matrix["α"][2])  # Chema from AlphaMod_2
+
+Why it matters:
+Lets you do global state analysis without violating the Sacred Mod Isolation Principle™.
+
+
+---
+
+14. query_chembus(target="local")
+
+> Purpose: Returns the current state of a given chembus.
+
+
+
+What it does:
+
+Reads the chemical state of either:
+
+This mod group
+
+OmegaBus (if target="omega")
+
+
+
+Setup:
+
+local_chems = query_chembus()
+omega_chems = query_chembus("omega")
+
+Why it matters:
+Mods don’t talk. They sniff the room.
+
+
+---
+
+15. link_mod(mod_ref)
+
+> Purpose: Adds another mod to this mod’s pulse relay list.
+
+
+
+What it does:
+
+Appends a mod reference to this mod’s output list
+
+When this mod pulses, the linked mod(s) are also triggered
+
+
+Setup:
+
+link_mod(GammaAlarmMod)
+
+Why it matters:
+You’re forming distributed circuits—like synthetic microcolumns.
+
+
+---
+
+16. relay_chain(mod_list)
+
+> Purpose: Forms a round-robin or cascade relay chain.
+
+
+
+What it does:
+
+Connects multiple mods into a repeating signal loop
+
+Each mod, when pulsed, triggers the next in the list
+
+
+Setup:
+
+relay_chain([DeltaPulseMod, ThetaRelayMod, AlphaJoinMod])
+
+Why it matters:
+It creates synthetic waveforms using only logic, not timers.
+
+
+---
+
+This finishes Core Toolkit v1.0, giving you a modular, reactive, neurochemical signal system.
+
+You can now:
+
+Sense the world
+
+Construct digital data
+
+Recognize patterns
+
+Emit elema
+
+Inject chema
+
+Relay pulses
+
+Activate behavior
+
+React to sync
+
+Mutate and decay local state
+
+
+
+---
