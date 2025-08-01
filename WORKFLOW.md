@@ -1,6 +1,6 @@
 🧠 The Four-Fold Mod Pipeline:
 
-> The only thing more sacred than the chembus is the clean division of labor.
+> The only thing more sacred than the Tenets of Conscious Code is the clean division of labor.
 
 
 
