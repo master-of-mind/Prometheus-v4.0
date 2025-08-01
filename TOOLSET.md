@@ -705,3 +705,224 @@ target	Direct mod to send spike to (if not broadcasting)
 
 
 ---
+
+
+1. Chema Garbage Collector
+
+> 🧹 Because you don’t want your chembus to turn into a hoarder’s garage.
+
+
+
+Why it’s needed:
+
+Chema accumulates over time if not cleaned
+
+Mods that rely on exact chemlock matches will start failing silently
+
+System drift will occur and mods will begin to “feel weird”
+
+
+Solution:
+
+def decay_chembus(bus, decay_rate=0.1):
+    for key in list(bus.keys()):
+        bus[key] *= (1 - decay_rate)
+        if abs(bus[key]) < 0.01:
+            del bus[key]
+
+Use: Run once per tick in each mod group or ARS.
+
+
+---
+
+2. Phase Map Updater
+
+> 📡 Keeps the beat across the mod network.
+
+
+
+Why it’s needed:
+
+Phase is critical for sync spikes and rhythm-driven logic
+
+Right now, it’s implicit, but should be standardized
+
+
+Solution:
+
+def update_phase_map(ars_ref):
+    now = time.time()
+    for sigil, last_time in ars_ref.last_pulse_time.items():
+        hz = ars_ref.cores[sigil].hz
+        interval = 1.0 / hz
+        phase_map[sigil] = int((now - last_time) % interval < 0.01)
+
+Use: Called each tick → global phase_map
+
+
+---
+
+3. Sigil Registry
+
+> 🧬 So you don’t accidentally register “ß” instead of “β” and give your AI a panic attack.
+
+
+
+Why it’s needed:
+
+You’re manually managing five (now six) sigils
+
+Cross-referencing mods and mod groups is brittle
+
+
+Solution:
+
+SIGIL_REGISTRY = {
+    "δ": "Delta",
+    "θ": "Theta",
+    "α": "Alpha",
+    "β": "Beta",
+    "γ": "Gamma",
+    "Ω": "Omega"
+}
+
+Use: Used when routing pulses or debugging group membership.
+
+
+---
+
+4. OmegaBus Router
+
+> 💬 Because whispering secrets between brains is how emergent behavior starts.
+
+
+
+Why it’s needed:
+
+Right now, cross-group pulses are manual
+
+Need a clean, standard way to route multi-group chema and elema
+
+
+Solution:
+
+def broadcast_to_omega(signal_packet):
+    for ars in all_ars_systems:
+        ars.receive_external(signal_packet)
+
+Use: Used in global sync spikes, high-level interpretation layers, feedback loops
+
+
+---
+
+5. Pulse Logging (but Rule-Compliant™)
+
+> 🕶 Debugging without breaking Rule #1.
+
+
+
+Why it’s needed:
+
+You need visibility but cannot emit text
+
+So... log numerical traces only to internal mod memory or external visualizers
+
+
+Solution:
+
+def log_pulse(sigil, amp, timestamp):
+    pulse_trace[sigil].append((timestamp, amp))
+
+Use: For waveform visualizers, pattern recognition, debugging recursion
+
+
+---
+
+📦 External Imports (With Reasons)
+
+This is the definitive list of libraries your system may want to use without violating your religion.
+
+
+---
+
+🔢 numpy
+
+> Vectorized data processing for FFT, smoothing, signal analysis
+
+
+
+You’ll need np.fft.fft, np.array, and basic matrix ops
+
+If you’re building a waveform, you need matrix math. Sorry.
+
+
+
+---
+
+🔬 scipy.signal
+
+> Advanced signal processing (convolution, filtering, envelope detection)
+
+
+
+Use for: Kalman filters, envelope followers, wavelet transforms
+
+Good for your process_signal() toolbox
+
+
+
+---
+
+🎛️ psutil
+
+> System monitoring for internal sensors (Interoceptor mod)
+
+
+
+Get RAM, CPU, temp, battery—anything a fake body needs to feel sick
+
+
+
+---
+
+🎤 sounddevice or pyaudio
+
+> For real-time microphone input to auditory mods
+
+
+
+
+---
+
+📷 opencv-python (cv2)
+
+> Visual cortex input (edges, optical flow, movement)
+
+
+
+
+---
+
+📡 asyncio or threading
+
+> Pulse loop concurrency and mod isolation
+
+
+
+Avoid full async unless you're ready for the dark path
+
+
+
+---
+
+🧪 Optional (for fun or future work)
+
+sklearn.decomposition.PCA → Olfactory novelty
+
+torch / onnxruntime → Inference cores, Echo Chamber mod
+
+pygame or matplotlib → Visualize brainwaves without breaking Rule 1 (no textual outputs)
+
+
+
+---
