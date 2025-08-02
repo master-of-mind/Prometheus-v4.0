@@ -1,3 +1,5 @@
+# theta_ars.py — Theta ARS (Autonomic Relay System)
+
 from chema import receive_chema
 from elema import elrec_accept
 
