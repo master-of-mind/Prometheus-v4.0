@@ -1,49 +1,44 @@
 # omega_ars.py — Omega ARS (Central Relay System)
 
-from chema import inject_chema, query_chembus, decay_chembus
-from elema import emit_elema, query_elema, decay_elema, elrec_accept
+from chema import receive_chema
+from elema import elrec_accept
 
-# === Internal State ===
-connected_ars = {}         # References to other ARS modules by sigil
-chembus_omega = []         # Omega chembus
+class OmegaARS:
+    def __init__(self):
+        self.sigil = "Ω"
+        self.mods = []
+        self.chema_bus = []
+        self.linked_ars = {}
 
-SIGIL = "Ω"
+    def add_mod(self, mod):
+        self.mods.append(mod)
 
-# === Pulse Receiver ===
-def receive_pulse(spike_packet):
-    """
-    Accepts incoming spike packets from other ARS systems or global mods.
-    Routes spikes to target ARS or handles global sync logic.
-    """
-    elrec_accept(spike_packet, target="omega")
+    def link_ars(self, sigil, ars_ref):
+        self.linked_ars[sigil] = ars_ref
 
-    # Decay on pulse
-    decay_chembus("omega")
-    decay_elema("omega")
+    def receive_pulse(self, spike_packet):
+        if not elrec_accept(spike_packet, self.sigil):
+            return
 
-# === Register External ARS Systems ===
-def link_ars(sigil, ars_ref):
-    connected_ars[sigil] = ars_ref
+        new_spikes = []
+        new_chema = []
 
-# === Push Elema to Other ARS ===
-def push_elema_to_all(spike_packet):
-    for sigil, ars in connected_ars.items():
-        ars.receive_pulse(spike_packet)
+        for mod in self.mods:
+            spikes, chema = mod.on_pulse(spike_packet)
+            new_spikes.extend(spikes)
+            new_chema.extend(chema)
 
-# === Pull Chema from All ARS ===
-def pull_chema_from_all():
-    for sigil, ars in connected_ars.items():
-        remote_chema = ars.get_chema()
-        inject_chema(remote_chema, target="omega")
+        for spike in new_spikes:
+            for sigil, ars in self.linked_ars.items():
+                ars.receive_pulse(spike)
 
-# === Allow ARS Modules to Pull Omega Chema ===
-def get_chema():
-    return query_chembus("omega")
+        for chem in new_chema:
+            destination = chem.get("destination_sigil")
+            if destination in self.linked_ars:
+                self.linked_ars[destination].receive_chema(chem)
 
-# === Receive Chema from Other ARS (if pushed manually) ===
-def receive_chema(chema_packet, from_sigil=None):
-    inject_chema(chema_packet, target="omega")
+    def receive_chema(self, chem_packet):
+        self.chema_bus.append(chem_packet)
 
-# === Utility: Get Connected ARS ===
-def get_connected():
-    return list(connected_ars.keys())
+    def get_chema(self):
+        return self.chema_bus
