@@ -1,75 +1,75 @@
 # elema.py — Synthetic Spike Engine
 
-import time
+# elema.py
+
 from collections import defaultdict
+import json
 
-# === Elema Storage ===
-elema_matrix = {
-    "local": [],
-    "omega": []
-}
+SIGIL_ORDER = ['δ', 'θ', 'α', 'β', 'γ', 'Ω']
 
-# === Emit Elema Spike ===
-def emit_elema(spike_dict, target="local"):
-    """
-    Adds a spike event to the elema matrix.
-    Each spike must include: sigil, amp, origin
-    Optional: phase, timestamp, sync_id
-    """
-    if target not in elema_matrix:
-        elema_matrix[target] = []
+class Elema:
+    def __init__(self):
+        self.spikes = []
 
-    spike = {
-        "sigil": spike_dict.get("sigil"),
-        "amp": spike_dict.get("amp", 1),
-        "origin": spike_dict.get("origin"),
-        "phase": spike_dict.get("phase", 0),
-        "timestamp": spike_dict.get("timestamp", time.time()),
-        "sync_id": spike_dict.get("sync_id", None),
-        "mod_id": spike_dict.get("mod_id", None),
-        "triggered_by": spike_dict.get("triggered_by", None),
-        "priority": spike_dict.get("priority", 0),
-        "target": spike_dict.get("target", None)
-    }
+    def emit_spike(self, sigil_matrix, origin, amp=1.0, phase=0, sync_id=None):
+        """
+        Emits a spike into the system.
+        sigil_matrix: list of 6 values (-1, 0, 1) showing directionality
+        origin: string name of the mod or system
+        amp: intensity (float)
+        phase: optional phase data (int)
+        sync_id: optional tag for chaining/sync
+        """
+        key = self._compress_matrix(sigil_matrix)
+        spike = {
+            "matrix": key,
+            "origin": origin,
+            "amp": amp,
+            "phase": phase,
+            "sync_id": sync_id
+        }
+        self.spikes.append(spike)
 
-    elema_matrix[target].append(spike)
+    def pull_spikes(self, target_sigil):
+        """
+        Pull all spikes that include this sigil in their matrix.
+        """
+        idx = SIGIL_ORDER.index(target_sigil)
+        relevant = []
+        for spike in self.spikes:
+            if self._decompress_matrix(spike['matrix'])[idx] != 0:
+                relevant.append(spike)
+        return relevant
 
-# === Elema Decay ===
-def decay_elema(target="local", max_len=10):
-    """
-    Trims elema list to most recent N spikes.
-    """
-    if target in elema_matrix:
-        while len(elema_matrix[target]) > max_len:
-            elema_matrix[target].pop(0)
+    def decay_spikes(self, decay_rate=0.1):
+        """
+        Gradually erases older spikes (based on amp), unless they’re reinforced.
+        """
+        decayed = []
+        for spike in self.spikes:
+            spike['amp'] -= decay_rate
+            if spike['amp'] > 0.01:
+                decayed.append(spike)
+        self.spikes = decayed
 
-# === Elema Query ===
-def query_elema(target="local"):
-    """
-    Returns current elema list for given target.
-    """
-    return elema_matrix.get(target, [])
+    def _compress_matrix(self, matrix):
+        """
+        Same format as chema—compressed string like θ:1,β:-1
+        """
+        return ','.join(f"{SIGIL_ORDER[i]}:{v}" for i, v in enumerate(matrix) if v != 0)
 
-# === Elema Match Test ===
-def elrec_test(sync_conditions, target="local"):
-    """
-    Checks if recent elema match provided conditions.
-    Conditions can include: sigil, mod_id, phase, sync_id
-    """
-    for spike in reversed(elema_matrix.get(target, [])):
-        match = all(spike.get(k) == v for k, v in sync_conditions.items())
-        if match:
-            return True
-    return False
+    def _decompress_matrix(self, matrix_str):
+        """
+        Converts compressed string back to list.
+        """
+        m = [0] * 6
+        if not matrix_str:
+            return m
+        parts = matrix_str.split(',')
+        for part in parts:
+            sigil, val = part.split(':')
+            m[SIGIL_ORDER.index(sigil)] = int(val)
+        return m
 
-# === Elema Compression Snapshot ===
-def compress_elema(target="local"):
-    """
-    Returns summary stats from elema: spike counts per sigil.
-    """
-    counts = defaultdict(int)
-    for spike in elema_matrix.get(target, []):
-        sigil = spike.get("sigil")
-        if sigil:
-            counts[sigil] += 1
-    return dict(counts)
+    def dump(self):
+        return json.dumps(self.spikes, indent=2)
