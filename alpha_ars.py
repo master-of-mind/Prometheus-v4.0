@@ -1,44 +1,40 @@
 # alpha_ars.py — Alpha ARS (Autonomic Relay System)
 
-from chema import receive_chema
-from elema import elrec_accept
+from chema import ChemaPacket, decay_and_cleanup_chema
+from elema import ElemaPacket, elrec_test
+from sigils import SIGIL_ALPHA
 
 class AlphaARS:
     def __init__(self):
-        self.sigil = "α"
-        self.mods = []
         self.chema_bus = []
-        self.linked_ars = {}
+        self.linked_mods = []
+        self.external_ars = {}
 
-    def add_mod(self, mod):
-        self.mods.append(mod)
+    def connect_mod(self, mod):
+        self.linked_mods.append(mod)
 
-    def link_ars(self, sigil, ars_ref):
-        self.linked_ars[sigil] = ars_ref
+    def connect_ars(self, sigil, ars):
+        self.external_ars[sigil] = ars
 
-    def receive_pulse(self, spike_packet):
-        if not elrec_accept(spike_packet, self.sigil):
-            return
+    def receive_elema(self, elema: ElemaPacket):
+        self.pulse(elema)
 
-        new_spikes = []
-        new_chema = []
+    def pulse(self, elema: ElemaPacket):
+        decay_and_cleanup_chema(self.chema_bus)
+        for mod in self.linked_mods:
+            if elrec_test(mod, elema):
+                mod.on_pulse(elema)
+        self.route_chema()
 
-        for mod in self.mods:
-            spikes, chema = mod.on_pulse(spike_packet)
-            new_spikes.extend(spikes)
-            new_chema.extend(chema)
-
-        for spike in new_spikes:
-            for sigil, ars in self.linked_ars.items():
-                ars.receive_pulse(spike)
-
-        for chem in new_chema:
-            destination = chem.get("destination_sigil")
-            if destination in self.linked_ars:
-                self.linked_ars[destination].receive_chema(chem)
-
-    def receive_chema(self, chem_packet):
-        self.chema_bus.append(chem_packet)
+    def add_chema(self, packet: ChemaPacket):
+        self.chema_bus.append(packet)
 
     def get_chema(self):
         return self.chema_bus
+
+    def route_chema(self):
+        to_push = [c for c in self.chema_bus if SIGIL_ALPHA not in c.destinations]
+        for packet in to_push:
+            for sigil, ars in self.external_ars.items():
+                if sigil in packet.destinations:
+                    ars.add_chema(packet)
