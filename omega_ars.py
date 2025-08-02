@@ -1,40 +1,43 @@
 # omega_ars.py — Omega ARS (Central Relay System)
 
-from chema import ChemaPacket, decay_and_cleanup_chema
-from elema import ElemaPacket, elrec_test
-from sigils import SIGIL_OMEGA
+from chema import ChemaBus
+from elema import ElemaPacket
 
 class OmegaARS:
     def __init__(self):
-        self.chema_bus = []
-        self.linked_mods = []
-        self.external_ars = {}
+        self.chema_bus = ChemaBus()
+        self.elema_matrix = []  # Stores history of incoming elema packets for Hz and strength analysis
+        self.ars_refs = {}  # Dictionary of other ARS modules keyed by sigil
 
-    def connect_mod(self, mod):
-        self.linked_mods.append(mod)
-
-    def connect_ars(self, sigil, ars):
-        self.external_ars[sigil] = ars
+    def register_ars(self, sigil, ars_module):
+        """Register an ARS module (delta, theta, etc.) for cross-communication."""
+        self.ars_refs[sigil] = ars_module
 
     def receive_elema(self, elema: ElemaPacket):
-        self.pulse(elema)
+        """Receives elema from other ARS modules or mods, stores and forwards."""
+        self.elema_matrix.append(elema.data)
+        self._push_elema(elema)
 
-    def pulse(self, elema: ElemaPacket):
-        decay_and_cleanup_chema(self.chema_bus)
-        for mod in self.linked_mods:
-            if elrec_test(mod, elema):
-                mod.on_pulse(elema)
-        self.route_chema()
+    def _push_elema(self, elema: ElemaPacket):
+        """Push the elema to each ARS module specified in the matrix."""
+        for i, val in enumerate(elema.data):
+            if val > 0:
+                sigil = self._index_to_sigil(i)
+                if sigil in self.ars_refs:
+                    self.ars_refs[sigil].receive_elema(elema)
 
-    def add_chema(self, packet: ChemaPacket):
-        self.chema_bus.append(packet)
+    def pull_chema(self):
+        """Allow external modules to pull the current omega chema."""
+        return self.chema_bus.read()
 
-    def get_chema(self):
-        return self.chema_bus
+    def receive_chema(self, chema_packet):
+        """Store incoming chema packet into Omega's chema bus."""
+        self.chema_bus.insert(chema_packet)
 
-    def route_chema(self):
-        to_push = [c for c in self.chema_bus if SIGIL_OMEGA not in c.destinations]
-        for packet in to_push:
-            for sigil, ars in self.external_ars.items():
-                if sigil in packet.destinations:
-                    ars.add_chema(packet)
+    def decay(self):
+        """Run chema decay logic."""
+        self.chema_bus.decay()
+
+    def _index_to_sigil(self, index):
+        sigils = ['δ', 'θ', 'α', 'β', 'γ', 'Ω']
+        return sigils[index] if 0 <= index < len(sigils) else None
