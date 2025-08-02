@@ -1,62 +1,42 @@
-# delta_ars.py — Delta ARS (Autonomic Relay System)
+from chema import receive_chema
+from elema import elrec_accept
 
-from chema import inject_chema, query_chembus, decay_chembus, chrec_trigger
-from elema import emit_elema, query_elema, decay_elema, elrec_accept
+class DeltaARS:
+    def __init__(self):
+        self.sigil = "δ"
+        self.mods = []
+        self.chema_bus = []
+        self.linked_ars = {}
 
-# === Internal State ===
-local_mods = []            # Mods assigned to Delta group
-connected_ars = {}         # References to other ARS modules by sigil
-chembus_local = []         # Local Delta chembus
+    def add_mod(self, mod):
+        self.mods.append(mod)
 
-SIGIL = "δ"
+    def link_ars(self, sigil, ars_ref):
+        self.linked_ars[sigil] = ars_ref
 
-# === Pulse Receiver ===
-def receive_pulse(spike_packet):
-    """
-    Accepts incoming spike packets from local mods or external ARS.
-    Routes spikes and applies chema if needed.
-    """
-    if spike_packet["sigil"] != SIGIL:
-        forward_to_ars(spike_packet)
-        return
+    def receive_pulse(self, spike_packet):
+        if not elrec_accept(spike_packet, self.sigil):
+            return
 
-    elrec_accept(spike_packet, target="local")
+        new_spikes = []
+        new_chema = []
 
-    # Notify mods
-    for mod in local_mods:
-        mod.on_pulse(spike_packet)
+        for mod in self.mods:
+            spikes, chema = mod.on_pulse(spike_packet)
+            new_spikes.extend(spikes)
+            new_chema.extend(chema)
 
-    # Apply decay logic (pulse = tick)
-    decay_chembus("local")
-    decay_elema("local")
+        for spike in new_spikes:
+            for sigil, ars in self.linked_ars.items():
+                ars.receive_pulse(spike)
 
-# === Forwarding Function ===
-def forward_to_ars(spike_packet):
-    sigil = spike_packet["sigil"]
-    if sigil in connected_ars:
-        connected_ars[sigil].receive_pulse(spike_packet)
+        for chem in new_chema:
+            destination = chem.get("destination_sigil")
+            if destination in self.linked_ars:
+                self.linked_ars[destination].receive_chema(chem)
 
-# === Register Mods ===
-def register_mod(mod_ref):
-    local_mods.append(mod_ref)
+    def receive_chema(self, chem_packet):
+        self.chema_bus.append(chem_packet)
 
-# === Register External ARS Systems ===
-def link_ars(sigil, ars_ref):
-    connected_ars[sigil] = ars_ref
-
-# === Broadcast Chema to Other ARS ===
-def push_chema_to_others(chema_packet):
-    for sigil, ars in connected_ars.items():
-        ars.receive_chema(chema_packet, from_sigil=SIGIL)
-
-# === Receive Chema from Other ARS ===
-def receive_chema(chema_packet, from_sigil=None):
-    inject_chema(chema_packet, target="local")
-
-# === Query Local Chembus ===
-def get_chema():
-    return query_chembus("local")
-
-# === Utility: Get Connected ARS ===
-def get_connected():
-    return list(connected_ars.keys())
+    def get_chema(self):
+        return self.chema_bus
