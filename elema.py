@@ -1,36 +1,32 @@
-# elema.py — Synthetic Spike Engine
+#elema.py
 
-SIGILS = ["δ", "θ", "α", "β", "γ", "Ω"]
+from collections import deque
 
 class Elema:
-    def __init__(self, values=None):
-        # values is a dict with sigils as keys and positive integers as strength
-        self.values = {sigil: 0 for sigil in SIGILS}
-        if values:
-            for k, v in values.items():
-                if k in self.values and isinstance(v, int) and v > 0:
-                    self.values[k] = v
+    def __init__(self):
+        # Each entry is a tuple: (origin_sigil, destination_sigil, amplitude_matrix)
+        self.elema_queue = deque()
 
-    def get(self, sigil):
-        return self.values.get(sigil, 0)
+    def add_elema(self, origin, destination, matrix):
+        """Add an elema pulse to the queue"""
+        self.elema_queue.append((origin, destination, matrix))
 
-    def set(self, sigil, strength):
-        if sigil in self.values and strength > 0:
-            self.values[sigil] = strength
+    def get_next_elema(self):
+        """Retrieve the next elema pulse from the queue"""
+        if self.elema_queue:
+            return self.elema_queue.popleft()
+        return None
 
-    def to_dict(self):
-        return {k: v for k, v in self.values.items() if v > 0}
+    def peek_all_elema(self):
+        """Returns a list of all current elema pulses without removing them"""
+        return list(self.elema_queue)
 
-    def __str__(self):
-        return f"<Elema: {self.to_dict()}>"
+    def clear(self):
+        """Empty the queue"""
+        self.elema_queue.clear()
 
-    def amplify(self, multiplier):
-        for k in self.values:
-            self.values[k] *= multiplier
+    def __len__(self):
+        return len(self.elema_queue)
 
-    def merge(self, other):
-        for k in self.values:
-            self.values[k] += other.get(k)
-
-    def is_empty(self):
-        return all(v == 0 for v in self.values.values())
+    def __repr__(self):
+        return f"<ElemaQueue size={len(self.elema_queue)}>"
