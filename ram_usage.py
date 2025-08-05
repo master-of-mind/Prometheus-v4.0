@@ -1,24 +1,17 @@
 from chema import ChemaPacket
 from elema import ElemaPulse
-import psutil
-from laptop_body import LaptopBody
 
 class RAMUsage:
-    def __init__(self, ars, simulation=False):
+    def __init__(self, ars, sim_body):
         self.ars = ars
-        self.simulation = simulation
+        self.sim_body = sim_body
         self.last_usage = None
-        self.sim_body = LaptopBody() if simulation else None
 
     def receive_pulse(self, pulse: ElemaPulse):
-        if self.simulation:
-            usage = self.sim_body.get_memory_usage()
-        else:
-            usage = psutil.virtual_memory().percent
-
+        usage = self.sim_body.get_memory_usage()
         if self.last_usage is None or abs(usage - self.last_usage) > 5:
             self.last_usage = usage
-            if usage > 90:  # arbitrary high usage warning
+            if usage > 90:
                 chema = ChemaPacket(
                     origin="RAMUsage",
                     destination=[1, 0, 0, 0, 0, 0],
