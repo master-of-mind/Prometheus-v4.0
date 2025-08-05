@@ -1,30 +1,18 @@
 from chema import ChemaPacket
 from elema import ElemaPulse
-import psutil
-from laptop_body import LaptopBody
 
 class FanSpeed:
-    def __init__(self, ars, simulation=False):
+    def __init__(self, ars, sim_body):
         self.ars = ars
-        self.simulation = simulation
+        self.sim_body = sim_body
         self.last_rpm = None
-        self.sim_body = LaptopBody() if simulation else None
 
     def receive_pulse(self, pulse: ElemaPulse):
-        if self.simulation:
-            fan_rpm = self.sim_body.get_fan_rpm()
-        else:
-            temps = psutil.sensors_fans()
-            if temps:
-                first_sensor = list(temps.keys())[0]
-                fan_rpm = temps[first_sensor][0].current
-            else:
-                fan_rpm = None
-
+        fan_rpm = self.sim_body.get_fan_rpm()
         if fan_rpm is not None:
             if self.last_rpm is None or abs(fan_rpm - self.last_rpm) > 200:
                 self.last_rpm = fan_rpm
-                if fan_rpm > 5000:  # arbitrary high RPM warning
+                if fan_rpm > 5000:
                     chema = ChemaPacket(
                         origin="FanSpeed",
                         destination=[1, 0, 0, 0, 0, 0],
