@@ -1,21 +1,13 @@
 from chema import ChemaPacket
 from elema import ElemaPulse
-import psutil
-from laptop_body import LaptopBody
 
 class Battery:
-    def __init__(self, ars, simulation=False):
+    def __init__(self, ars, sim_body):
         self.ars = ars
-        self.simulation = simulation
-        self.sim_body = LaptopBody() if simulation else None
+        self.sim_body = sim_body
 
     def receive_pulse(self, pulse: ElemaPulse):
-        if self.simulation:
-            battery = self.sim_body.get_battery()
-        else:
-            batt_info = psutil.sensors_battery()
-            battery = batt_info.percent if batt_info else None
-
+        battery = self.sim_body.get_battery()
         if battery is not None and battery < 20:
             chema = ChemaPacket(
                 origin="Battery",
