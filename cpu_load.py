@@ -1,21 +1,14 @@
 from chema import ChemaPacket
 from elema import ElemaPulse
-import psutil
-from laptop_body import LaptopBody
 
 class CPULoad:
-    def __init__(self, ars, simulation=False):
+    def __init__(self, ars, sim_body):
         self.ars = ars
-        self.simulation = simulation
+        self.sim_body = sim_body
         self.last_load = None
-        self.sim_body = LaptopBody() if simulation else None
 
     def receive_pulse(self, pulse: ElemaPulse):
-        if self.simulation:
-            load = self.sim_body.get_cpu_load()
-        else:
-            load = psutil.cpu_percent()
-
+        load = self.sim_body.get_cpu_load()
         if self.last_load is None or abs(load - self.last_load) > 10:
             self.last_load = load
             if load > 85:
