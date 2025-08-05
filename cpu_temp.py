@@ -1,22 +1,14 @@
 from chema import ChemaPacket
 from elema import ElemaPulse
-import psutil
-from laptop_body import LaptopBody
 
 class CPUTemp:
-    def __init__(self, ars, simulation=False):
+    def __init__(self, ars, sim_body):
         self.ars = ars
-        self.simulation = simulation
+        self.sim_body = sim_body
         self.last_temp = None
-        self.sim_body = LaptopBody() if simulation else None
 
     def receive_pulse(self, pulse: ElemaPulse):
-        if self.simulation:
-            cpu_temp = self.sim_body.get_cpu_temp()
-        else:
-            temps = psutil.sensors_temperatures()
-            cpu_temp = temps.get('coretemp', [])[0].current if 'coretemp' in temps else None
-
+        cpu_temp = self.sim_body.get_cpu_temp()
         if cpu_temp is not None:
             if self.last_temp is None or abs(cpu_temp - self.last_temp) > 1:
                 self.last_temp = cpu_temp
